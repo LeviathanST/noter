@@ -1,0 +1,14 @@
+[package]
+name = "noter"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.95"
+config = { version = "0.15.4", features = ["toml"] }
+crossterm = { version = "0.28.1", features = ["serde"] }
+serde = "1.0.217"
+serde_derive = "1.0.217"
+sqlx = { version = "0.8.2", features = ["chrono", "sqlite", "runtime-tokio"] }
+tokio = { version = "1.42.0", features = ["macros", "rt-multi-thread"] }
+widgetui = "0.7.1"
