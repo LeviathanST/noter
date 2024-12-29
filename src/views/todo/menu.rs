@@ -6,13 +6,20 @@ use widgetui::{
     Chunks, Res, ResMut, WidgetFrame, WidgetResult,
 };
 
+use crate::app_state::{AppState, Page};
+
 pub struct MenuChunk;
 
 pub fn render(
     mut frame: ResMut<WidgetFrame>,
+    app_state: Res<AppState>,
     page_state: Res<super::PageState>,
     chunks: Res<Chunks>,
 ) -> WidgetResult {
+    if app_state.page != Page::Todo {
+        return Ok(());
+    }
+
     let chunk = chunks.get_chunk::<MenuChunk>()?;
     let block = Block::new().title("Menu").borders(Borders::ALL).fg(
         if page_state.selected_block_idx == 2 {

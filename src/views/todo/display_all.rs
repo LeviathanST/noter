@@ -9,7 +9,12 @@ use widgetui::{
     Chunks, Events, Res, ResMut, State, WidgetFrame, WidgetResult,
 };
 
-use crate::{app_state::AppState, models::todo::Todo, utils, views::key_match};
+use crate::{
+    app_state::{AppState, Page},
+    models::todo::Todo,
+    utils,
+    views::key_match,
+};
 
 pub struct TodoDisplayChunk;
 
@@ -23,6 +28,9 @@ pub fn event_handler(
     page_state: Res<super::PageState>,
     mut events: ResMut<Events>,
 ) -> WidgetResult {
+    if app_state.page != Page::Todo {
+        return Ok(());
+    }
     let Some(event) = &events.event else {
         return Ok(());
     };
@@ -38,6 +46,9 @@ pub fn event_handler(
     return Ok(());
 }
 pub fn todo_updater(app_state: Res<AppState>, mut state: ResMut<CustomState>) -> WidgetResult {
+    if app_state.page != Page::Todo {
+        return Ok(());
+    }
     let pool = app_state.pool.clone();
     let todos = utils::run_async_fn(async move { Todo::get_all(&pool).await })?;
     state.todos = todos;
@@ -46,10 +57,14 @@ pub fn todo_updater(app_state: Res<AppState>, mut state: ResMut<CustomState>) ->
 
 pub fn render(
     mut frame: ResMut<WidgetFrame>,
+    app_state: Res<AppState>,
     state: Res<CustomState>,
     page_state: Res<super::PageState>,
     chunks: Res<Chunks>,
 ) -> WidgetResult {
+    if app_state.page != Page::Todo {
+        return Ok(());
+    }
     let chunk = chunks.get_chunk::<TodoDisplayChunk>()?;
     let header = utils::into_row(
         [

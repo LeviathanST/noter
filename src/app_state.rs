@@ -7,7 +7,7 @@ use widgetui::State;
 
 use crate::views::KeyConfig;
 
-#[derive(Default)]
+#[derive(PartialEq, Default)]
 pub enum Page {
     #[default]
     Todo,
