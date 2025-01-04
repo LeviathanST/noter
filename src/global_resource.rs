@@ -1,9 +1,10 @@
 use std::sync::Arc;
 
-use anyhow::Result;
+use bevy::prelude::Resource;
+use color_eyre::Result;
 use config::{Config, File};
 use sqlx::SqlitePool;
-use widgetui::State;
+use tokio::runtime;
 
 use crate::views::KeyConfig;
 
@@ -12,16 +13,16 @@ pub enum Page {
     #[default]
     Todo,
 }
-#[derive(State)]
-pub struct AppState {
+#[derive(Resource)]
+pub struct GlobalResource {
     pub pool: Arc<SqlitePool>,
     pub key_config: KeyConfig,
     pub page: Page,
 }
 
-impl AppState {
-    pub async fn new() -> Result<Self> {
-        let pool = SqlitePool::connect("sqlite:schema.db").await?;
+impl Default for GlobalResource {
+    fn default() -> Self {
+        let pool = setup_db().unwrap();
         let config_file = File::with_name("config");
         let key_config = Config::builder()
             .add_source(config_file.required(true))
@@ -32,10 +33,16 @@ impl AppState {
             .try_deserialize::<KeyConfig>()
             .map_err(|err| print!("{:?}", err))
             .unwrap();
-        Ok(Self {
+        Self {
             pool: pool.into(),
             key_config,
             page: Page::default(),
-        })
+        }
     }
+}
+
+fn setup_db() -> Result<SqlitePool> {
+    let rt = runtime::Runtime::new().unwrap();
+    let pool = rt.block_on(SqlitePool::connect("sqlite:schema.db"))?;
+    Ok(pool)
 }

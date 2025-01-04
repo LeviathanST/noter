@@ -4,11 +4,14 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-anyhow = "1.0.95"
+bevy = { version = "0.15", default-features = false, features = ["bevy_state"] }
+bevy_ratatui = "0.7.0"
+color-eyre = "0.6.3"
 config = { version = "0.15.4", features = ["toml"] }
+crossbeam-channel = "0.5.14"
 crossterm = { version = "0.28.1", features = ["serde"] }
+ratatui = "0.29.0"
 serde = "1.0.217"
 serde_derive = "1.0.217"
 sqlx = { version = "0.8.2", features = ["chrono", "sqlite", "runtime-tokio"] }
 tokio = { version = "1.42.0", features = ["macros", "rt-multi-thread"] }
-widgetui = "0.7.1"

@@ -1,13 +1,13 @@
-use anyhow::Result;
+use color_eyre::Result;
+use ratatui::{style::Style, widgets::Row};
 use sqlx::{
     prelude::FromRow,
     query,
     types::chrono::{self, Local, TimeZone},
     SqlitePool,
 };
-use widgetui::ratatui::{style::Style, widgets::Row};
 
-use crate::utils;
+use crate::utils::into_row;
 
 #[derive(FromRow, Debug)]
 pub struct Todo {
@@ -52,14 +52,15 @@ impl Todo {
         return Ok(());
     }
 
-    pub fn into_row<'a>(&'a self) -> Row<'a> {
-        utils::into_row(
+    pub fn into_row<'a>(&self) -> Row<'a> {
+        return into_row(
             [
-                self.id.to_string(),
-                self.name.to_string(),
-                self.created_at.to_string(),
+                &self.id.to_string(),
+                &self.name,
+                &self.description,
+                &self.created_at.to_string(),
             ],
             Style::default(),
-        )
+        );
     }
 }

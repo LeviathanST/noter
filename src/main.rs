@@ -1,17 +1,28 @@
-use anyhow::Result;
-use app_state::AppState;
-use views::todo::TodoSet;
-use widgetui::App;
+use bevy::{
+    app::{App, ScheduleRunnerPlugin},
+    prelude::PluginGroup,
+    state::app::StatesPlugin,
+    MinimalPlugins,
+};
+use bevy_ratatui::RatatuiPlugins;
+use crossterm::terminal::enable_raw_mode;
+use global_resource::GlobalResource;
+use views::todo::TodoPlugin;
 
-mod app_state;
+mod global_resource;
 mod models;
 mod utils;
 mod views;
 
-#[tokio::main]
-async fn main() -> Result<()> {
-    let app_state = AppState::new().await?;
+fn main() {
+    enable_raw_mode().unwrap();
+    let wait_duration = std::time::Duration::from_secs_f64(1. / 60.);
 
-    App::new(100)?.states(app_state).sets(TodoSet).run()?;
-    return Ok(());
+    App::new()
+        .add_plugins(RatatuiPlugins::default())
+        .add_plugins(StatesPlugin::default())
+        .add_plugins(MinimalPlugins.set(ScheduleRunnerPlugin::run_loop(wait_duration)))
+        .init_resource::<GlobalResource>()
+        .add_plugins(TodoPlugin::default())
+        .run();
 }
