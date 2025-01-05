@@ -1,10 +1,10 @@
 use std::sync::Arc;
 
+use async_std::task::block_on;
 use bevy::prelude::Resource;
 use color_eyre::Result;
 use config::{Config, File};
 use sqlx::SqlitePool;
-use tokio::runtime;
 
 use crate::views::KeyConfig;
 
@@ -42,7 +42,6 @@ impl Default for GlobalResource {
 }
 
 fn setup_db() -> Result<SqlitePool> {
-    let rt = runtime::Runtime::new().unwrap();
-    let pool = rt.block_on(SqlitePool::connect("sqlite:schema.db"))?;
+    let pool = block_on(async move { SqlitePool::connect("sqlite:schema.db").await })?;
     Ok(pool)
 }
