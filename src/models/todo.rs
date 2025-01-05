@@ -57,7 +57,6 @@ impl Todo {
             [
                 &self.id.to_string(),
                 &self.name,
-                &self.description,
                 &self.created_at.to_string(),
             ],
             Style::default(),
