@@ -3,7 +3,7 @@ mod display_todo;
 mod setting;
 
 use bevy::{
-    app::{Plugin, Startup, Update},
+    app::{Plugin, PreUpdate, Startup, Update},
     prelude::{
         in_state, AppExtStates, IntoSystem, IntoSystemConfigs, Res, ResMut, Resource, State,
     },
@@ -12,7 +12,7 @@ use bevy::{
 use bevy_ratatui::{error::exit_on_error, terminal::RatatuiContext};
 use color_eyre::eyre::Result;
 use display_todo::{poll_todos, LoadingState};
-use ratatui::layout::{Constraint, Layout, Rect};
+use ratatui::layout::{Constraint, Layout};
 
 use crate::models::todo::Todo;
 
@@ -20,7 +20,7 @@ use crate::models::todo::Todo;
 pub struct TodoResources {
     todos: Vec<Todo>,
     contents: HashMap<u64, String>,
-    layout: Vec<Rect>,
+    selected_block_idx: usize,
 }
 
 #[derive(Default)]
@@ -32,6 +32,7 @@ impl Plugin for TodoPlugin {
             .insert_state(LoadingState::IsDone)
             .add_systems(Startup, display_todo::retrives_todos)
             .add_systems(Update, poll_todos.run_if(in_state(LoadingState::IsLoading)))
+            .add_systems(PreUpdate, display_todo::key_binding)
             .add_systems(Update, render.pipe(exit_on_error));
     }
 }

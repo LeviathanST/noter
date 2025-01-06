@@ -6,7 +6,7 @@ use color_eyre::Result;
 use config::{Config, File};
 use sqlx::SqlitePool;
 
-use crate::views::KeyConfig;
+use crate::views::{KeyConfig, NoterAction};
 
 #[derive(PartialEq, Default)]
 pub enum Page {
@@ -16,7 +16,7 @@ pub enum Page {
 #[derive(Resource)]
 pub struct GlobalResource {
     pub pool: Arc<SqlitePool>,
-    pub key_config: KeyConfig,
+    pub action: NoterAction,
     pub page: Page,
 }
 
@@ -33,9 +33,12 @@ impl Default for GlobalResource {
             .try_deserialize::<KeyConfig>()
             .map_err(|err| print!("{:?}", err))
             .unwrap();
+
+        let action = NoterAction::from(key_config);
+
         Self {
             pool: pool.into(),
-            key_config,
+            action,
             page: Page::default(),
         }
     }

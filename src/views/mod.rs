@@ -1,14 +1,23 @@
 use std::collections::HashMap;
 
-use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+use bevy_ratatui::event::KeyEvent;
+use crossterm::event::{KeyCode, KeyModifiers};
 use serde::{Deserialize, Serialize};
 
 pub mod todo;
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Hash, PartialEq, Eq)]
 pub struct NoterKeyEvent {
     pub code: KeyCode,
     pub modifiers: KeyModifiers,
+}
+impl From<KeyEvent> for NoterKeyEvent {
+    fn from(value: KeyEvent) -> Self {
+        NoterKeyEvent {
+            code: value.code,
+            modifiers: value.modifiers,
+        }
+    }
 }
 impl<'de> Deserialize<'de> for NoterKeyEvent {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
@@ -78,7 +87,16 @@ impl<'de> Deserialize<'de> for NoterKeyEvent {
 pub struct KeyConfig {
     pub key_binding: HashMap<String, NoterKeyEvent>,
 }
+pub struct NoterAction(HashMap<NoterKeyEvent, String>);
 
-pub fn key_match(ev: &KeyEvent, binding: &NoterKeyEvent) -> bool {
-    ev.code == binding.code && ev.modifiers == binding.modifiers
+impl From<KeyConfig> for NoterAction {
+    fn from(value: KeyConfig) -> Self {
+        NoterAction(
+            value
+                .key_binding
+                .into_iter()
+                .map(|(name, event)| (event, name))
+                .collect::<HashMap<NoterKeyEvent, String>>(),
+        )
+    }
 }

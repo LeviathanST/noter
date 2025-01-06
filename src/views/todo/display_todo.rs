@@ -1,15 +1,22 @@
 use bevy::{
-    prelude::{Commands, NextState, Res, ResMut, Resource, State, States},
+    app::AppExit,
+    prelude::{
+        Commands, EventReader, EventWriter, NextState, Res, ResMut, Resource, State, States,
+    },
     tasks::{block_on, futures_lite::future, AsyncComputeTaskPool, Task},
     utils::HashMap,
 };
+use bevy_ratatui::event::KeyEvent;
 use ratatui::{
     layout::Constraint,
+    prelude::Stylize,
     style::{Color, Style},
     widgets::{Block, Borders, Row, Table, Widget},
 };
 
-use crate::{global_resource::GlobalResource, models::todo::Todo, utils::into_row};
+use crate::{
+    global_resource::GlobalResource, models::todo::Todo, utils::into_row, views::NoterKeyEvent,
+};
 
 use super::TodoResources;
 
@@ -45,10 +52,36 @@ pub fn widget(
     );
     let block = Block::default()
         .title("Todo")
-        .style(Style::default().fg(Color::White))
+        .fg(if resources.selected_block_idx == 0 {
+            Color::Green
+        } else {
+            Color::White
+        })
         .borders(Borders::ALL);
 
     Table::new(rows, constraint).header(header).block(block)
+}
+
+pub fn key_binding(
+    mut events: EventReader<KeyEvent>,
+    mut exit: EventWriter<AppExit>,
+    global_resources: Res<GlobalResource>,
+    resources: Res<TodoResources>,
+) {
+    if resources.selected_block_idx == 0 {
+        let action_map = &global_resources.action;
+        for event in events.read() {
+            let noter_event = NoterKeyEvent::from(event.clone());
+            if let Some(action) = action_map.0.get(&noter_event) {
+                match action.as_str() {
+                    "quit_program" => {
+                        exit.send_default();
+                    }
+                    _ => {}
+                };
+            }
+        }
+    }
 }
 
 pub fn retrives_todos(
